@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33712.159
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adis", "Adis\Adis.csproj", "{72D0BA95-D915-4165-9679-C5750C7E3E27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adis.Tests", "Adis.Tests\Adis.Tests.csproj", "{E4083C39-1BED-4E8E-B9DB-A9866B4DE01E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{72D0BA95-D915-4165-9679-C5750C7E3E27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72D0BA95-D915-4165-9679-C5750C7E3E27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72D0BA95-D915-4165-9679-C5750C7E3E27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72D0BA95-D915-4165-9679-C5750C7E3E27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4083C39-1BED-4E8E-B9DB-A9866B4DE01E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4083C39-1BED-4E8E-B9DB-A9866B4DE01E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4083C39-1BED-4E8E-B9DB-A9866B4DE01E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4083C39-1BED-4E8E-B9DB-A9866B4DE01E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A74BA4CA-9E50-433D-A7D4-82FD4784D30B}
+	EndGlobalSection
+EndGlobal
