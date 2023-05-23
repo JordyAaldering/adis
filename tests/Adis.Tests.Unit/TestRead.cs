@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System.Linq;
+using Xunit;
 
 namespace Adis.Tests;
 
@@ -9,7 +10,7 @@ public class TestRead
     {
         const string header = "DN001234000001110230000444405600077777889";
 
-        var def = AdisDefinition.FromString(header);
+        var def = AdisDefinition.FromLine(header);
         var columns = def.ColumnDefinitions.ToList();
 
         Assert.Equal(1234, def.EventNumber);

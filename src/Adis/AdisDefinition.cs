@@ -7,21 +7,20 @@ namespace Adis;
 
 public class AdisDefinition
 {
-    private readonly int eventNumber;
-    private readonly LineStatus lineStatus;
+    public int EventNumber { get; }
+    public LineStatus LineStatus { get; }
+
     private readonly List<ColumnDefinition> columnDefinitions = new();
 
-    public int EventNumber => eventNumber;
-
-    internal IEnumerable<ColumnDefinition> ColumnDefinitions => columnDefinitions;
+    internal IReadOnlyList<ColumnDefinition> ColumnDefinitions => columnDefinitions;
 
     public AdisDefinition(int eventNumber, LineStatus lineStatus = LineStatus.Normal)
     {
-        this.eventNumber = eventNumber;
-        this.lineStatus = lineStatus;
+        EventNumber = eventNumber;
+        LineStatus = lineStatus;
     }
 
-    public static AdisDefinition FromString(string line)
+    public static AdisDefinition FromLine(string line)
     {
         Debug.Assert(line[0] == (char)LineType.Definition);
 
@@ -49,7 +48,7 @@ public class AdisDefinition
 
     public AdisEvent CreateAdisEvent()
     {
-        return new AdisEvent(this, eventNumber, lineStatus);
+        return new AdisEvent(this, EventNumber, LineStatus, new DefaultFormatProvider());
     }
 
     public override string ToString()
@@ -57,8 +56,8 @@ public class AdisDefinition
         var sb = new StringBuilder();
 
         sb.Append((char)LineType.Definition);
-        sb.Append((char)lineStatus);
-        sb.Append($"{eventNumber:D6}");
+        sb.Append((char)LineStatus);
+        sb.Append($"{EventNumber:D6}");
 
         foreach (var column in columnDefinitions)
         {
