@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace Adis.Tests;
+namespace Adis.Tests.Unit;
 
 public class TestWrite
 {

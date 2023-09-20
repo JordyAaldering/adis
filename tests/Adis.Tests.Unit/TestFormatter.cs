@@ -1,7 +1,7 @@
 ﻿using System;
 using Xunit;
 
-namespace Adis.Tests;
+namespace Adis.Tests.Unit;
 
 public class TestFormatter
 {

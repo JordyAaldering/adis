@@ -8,6 +8,7 @@ namespace Adis;
 public class AdisRequest
 {
     public int EventNumber { get; }
+
     public LineStatus LineStatus { get; }
 
     private readonly List<ColumnDefinition> columnDefinitions = new();
@@ -18,11 +19,14 @@ public class AdisRequest
         LineStatus = lineStatus;
     }
 
-    public void AddColumnDefinition(int ddi, int length, int resolution = 0)
-    {
-        columnDefinitions.Add(new ColumnDefinition(ddi, length, resolution));
-    }
-
+    /// <summary>
+    /// Create a new ADIS request from a string, which should be formatted as follows:
+    ///  - 1 character 'R'
+    ///  - 1 character that describes the line status
+    ///  - 6 characters that describe the event number
+    ///  - 11 characters for each column definition
+    /// </summary>
+    /// <example>RN01234501234567899</example>
     public static AdisRequest FromLine(string line)
     {
         Debug.Assert(line[0] == (char)LineType.Request);
@@ -32,7 +36,7 @@ public class AdisRequest
         var def = new AdisRequest(eventNumber, lineStatus);
 
         int i = 8;
-        while (i < line.Length)
+        while (i < line.Length - 11)
         {
             int ddi = int.Parse(line.AsSpan(i, 8));
             int len = int.Parse(line.AsSpan(i + 8, 2));
@@ -42,6 +46,11 @@ public class AdisRequest
         }
 
         return def;
+    }
+
+    public void AddColumnDefinition(int ddi, int length, int resolution = 0)
+    {
+        columnDefinitions.Add(new ColumnDefinition(ddi, length, resolution));
     }
 
     public override string ToString()

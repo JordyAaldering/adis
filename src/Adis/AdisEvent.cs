@@ -7,7 +7,7 @@ using System.Text;
 namespace Adis;
 
 /// <summary>
-/// A line of adis data
+/// A line of adis data.
 /// </summary>
 public class AdisEvent
 {
@@ -18,11 +18,19 @@ public class AdisEvent
     private readonly IReadOnlyList<ColumnDefinition> columnDefinitions;
     private readonly IFormatProvider formatProvider;
 
+    public AdisEvent(AdisDefinition definition, int eventNumber, LineStatus lineStatus = LineStatus.Normal)
+    {
+        EventNumber = eventNumber;
+        LineStatus = lineStatus;
+        columnDefinitions = definition.Columns;
+        formatProvider = new DefaultFormatProvider();
+    }
+
     public AdisEvent(AdisDefinition definition, int eventNumber, LineStatus lineStatus, IFormatProvider formatProvider)
     {
         EventNumber = eventNumber;
         LineStatus = lineStatus;
-        columnDefinitions = definition.ColumnDefinitions;
+        columnDefinitions = definition.Columns;
         this.formatProvider = formatProvider;
     }
 
@@ -48,7 +56,7 @@ public class AdisEvent
         var adisEvent = new AdisEvent(definition, eventNumber, lineStatus, formatProvider);
 
         int i = 8;
-        foreach (var column in definition.ColumnDefinitions)
+        foreach (var column in definition.Columns)
         {
             string value = line.Substring(i, column.Length);
             adisEvent.data[column.Ddi] = value;

@@ -1,5 +1,3 @@
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using System;
 using System.IO;
 using Xunit;
 

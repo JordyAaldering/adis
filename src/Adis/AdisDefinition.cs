@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 
 namespace Adis;
@@ -8,18 +9,36 @@ namespace Adis;
 public class AdisDefinition
 {
     public int EventNumber { get; }
+
     public LineStatus LineStatus { get; }
 
-    private readonly List<ColumnDefinition> columnDefinitions = new();
+    internal IReadOnlyList<ColumnDefinition> Columns => columns;
 
-    internal IReadOnlyList<ColumnDefinition> ColumnDefinitions => columnDefinitions;
+    private readonly List<ColumnDefinition> columns = new();
+    private readonly IFormatProvider formatProvider;
 
     public AdisDefinition(int eventNumber, LineStatus lineStatus = LineStatus.Normal)
     {
         EventNumber = eventNumber;
         LineStatus = lineStatus;
+        formatProvider = new DefaultFormatProvider();
     }
 
+    public AdisDefinition(int eventNumber, LineStatus lineStatus, IFormatProvider formatProvider)
+    {
+        EventNumber = eventNumber;
+        LineStatus = lineStatus;
+        this.formatProvider = formatProvider;
+    }
+
+    /// <summary>
+    /// Create a new ADIS definition from a string, which should be formatted as follows:
+    ///  - 1 character 'D'
+    ///  - 1 character that describes the line status
+    ///  - 6 characters that describe the event number
+    ///  - 11 characters for each column definition
+    /// </summary>
+    /// <example>DN01234501234567899</example>
     public static AdisDefinition FromLine(string line)
     {
         Debug.Assert(line[0] == (char)LineType.Definition);
@@ -43,12 +62,22 @@ public class AdisDefinition
 
     public void AddColumnDefinition(int ddi, int length, int resolution = 0)
     {
-        columnDefinitions.Add(new ColumnDefinition(ddi, length, resolution));
+        columns.Add(new ColumnDefinition(ddi, length, resolution));
+    }
+
+    public int GetLength(int ddi)
+    {
+        return columns.First(c => c.Ddi == ddi).Length;
+    }
+
+    public int GetResolution(int ddi)
+    {
+        return columns.First(c => c.Ddi == ddi).Resolution;
     }
 
     public AdisEvent CreateAdisEvent()
     {
-        return new AdisEvent(this, EventNumber, LineStatus, new DefaultFormatProvider());
+        return new AdisEvent(this, EventNumber, LineStatus, formatProvider);
     }
 
     public override string ToString()
@@ -59,7 +88,7 @@ public class AdisDefinition
         sb.Append((char)LineStatus);
         sb.Append($"{EventNumber:D6}");
 
-        foreach (var column in columnDefinitions)
+        foreach (var column in columns)
         {
             sb.Append(column.ToString());
         }
