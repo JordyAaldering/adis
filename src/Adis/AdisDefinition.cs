@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -8,9 +9,18 @@ namespace Adis;
 
 public class AdisDefinition
 {
-    public int EventNumber { get; }
+	/// <summary>
+	/// The event number of this request.
+	/// </summary>
+	/// <example>123456</example>
+	[Range(0, 999999)]
+	public int EventNumber { get; }
 
-    public LineStatus LineStatus { get; }
+	/// <summary>
+	/// The line status of this request.
+	/// </summary>
+	/// <example>N</example>
+	public LineStatus LineStatus { get; }
 
     internal IReadOnlyList<ColumnDefinition> Columns => columns;
 
@@ -38,24 +48,25 @@ public class AdisDefinition
     ///  - 6 characters that describe the event number
     ///  - 11 characters for each column definition
     /// </summary>
-    /// <example>DN01234501234567899</example>
+    /// <example>DN12345612345678999...</example>
     public static AdisDefinition FromLine(string line)
     {
-        Debug.Assert(line[0] == (char)LineType.Definition);
+        var lineType = String.Pop(ref line);
+        Debug.Assert(lineType == (char)LineType.Definition);
 
-        var lineStatus = (LineStatus)line[1];
-        int eventNumber = int.Parse(line.AsSpan(2, 6));
+        var lineStatus = (LineStatus)String.Pop(ref line);
+        int eventNumber = int.Parse(String.Pop(ref line, 6));
         var def = new AdisDefinition(eventNumber, lineStatus);
 
-        int i = 8;
-        while (i < line.Length)
+        while (line.Length >= 11)
         {
-            int ddi = int.Parse(line.AsSpan(i, 8));
-            int len = int.Parse(line.AsSpan(i + 8, 2));
-            int res = int.Parse(line.AsSpan(i + 10, 1));
+            int ddi = int.Parse(String.Pop(ref line, 8));
+            int len = int.Parse(String.Pop(ref line, 2));
+            int res = int.Parse(String.Pop(ref line, 1));
             def.AddColumnDefinition(ddi, len, res);
-            i += 11;
         }
+
+        Debug.Assert(line.Length == 0, $"Line has remaining characters: {line}");
 
         return def;
     }

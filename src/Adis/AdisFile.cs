@@ -22,7 +22,8 @@ public class AdisFile
 
         while (reader.ReadLine() is { } line)
         {
-            var lineType = (LineType)line[0];
+            line = line.Trim().TrimEnd(Environment.NewLine.ToCharArray());
+			var lineType = (LineType)line[0];
             switch (lineType)
             {
                 case LineType.Definition:

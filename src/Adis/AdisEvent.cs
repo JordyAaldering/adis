@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -11,8 +12,18 @@ namespace Adis;
 /// </summary>
 public class AdisEvent
 {
-    public int EventNumber { get; }
-    public LineStatus LineStatus { get; }
+	/// <summary>
+	/// The event number of this request.
+	/// </summary>
+	/// <example>123456</example>
+	[Range(0, 999999)]
+	public int EventNumber { get; }
+
+	/// <summary>
+	/// The line status of this request.
+	/// </summary>
+	/// <example>N</example>
+	public LineStatus LineStatus { get; }
 
     private readonly Dictionary<int, string> data = new();
     private readonly IReadOnlyList<ColumnDefinition> columnDefinitions;
@@ -46,24 +57,34 @@ public class AdisEvent
         data[ddi] = formatProvider.Serialize(value, col.Length, col.Resolution);
     }
 
-    public static AdisEvent FromLine(string line, AdisDefinition definition, IFormatProvider formatProvider)
+	/// <summary>
+	/// Create a new ADIS event from a string, which should be formatted as follows:
+	///  - 1 character 'V'
+	///  - 1 character that describes the line status
+	///  - 6 characters that describe the event number
+	///  - N characters for each column in the definition
+	/// </summary>
+	/// <example>VN1234561231234...</example>
+	public static AdisEvent FromLine(string line, AdisDefinition definition, IFormatProvider formatProvider)
     {
-        Debug.Assert(line[0] == (char)LineType.Value);
-        var lineStatus = (LineStatus)line[1];
-        int eventNumber = int.Parse(line.AsSpan(2, 6));
+        char lineType = String.Pop(ref line);
+        Debug.Assert(lineType == (char)LineType.Value);
+
+        var lineStatus = (LineStatus)String.Pop(ref line);
+        int eventNumber = int.Parse(String.Pop(ref line, 6));
         Debug.Assert(eventNumber == definition.EventNumber);
 
         var adisEvent = new AdisEvent(definition, eventNumber, lineStatus, formatProvider);
 
-        int i = 8;
         foreach (var column in definition.Columns)
         {
-            string value = line.Substring(i, column.Length);
-            adisEvent.data[column.Ddi] = value;
-            i += column.Length;
+            var value = String.Pop(ref line, column.Length);
+			adisEvent.data[column.Ddi] = value.ToString();
         }
 
-        return adisEvent;
+		Debug.Assert(line.Length == 0, $"Line has remaining characters: {line}");
+
+		return adisEvent;
     }
 
     public override string ToString()

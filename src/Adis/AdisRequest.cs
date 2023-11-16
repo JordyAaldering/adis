@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Text;
 
@@ -7,8 +8,17 @@ namespace Adis;
 
 public class AdisRequest
 {
+    /// <summary>
+    /// The event number of this request.
+    /// </summary>
+    /// <example>123456</example>
+    [Range(0, 999999)]
     public int EventNumber { get; }
 
+    /// <summary>
+    /// The line status of this request.
+    /// </summary>
+    /// <example>N</example>
     public LineStatus LineStatus { get; }
 
     private readonly List<ColumnDefinition> columnDefinitions = new();
@@ -26,26 +36,27 @@ public class AdisRequest
     ///  - 6 characters that describe the event number
     ///  - 11 characters for each column definition
     /// </summary>
-    /// <example>RN01234501234567899</example>
+    /// <example>RN12345612345678999...</example>
     public static AdisRequest FromLine(string line)
     {
-        Debug.Assert(line[0] == (char)LineType.Request);
+        var lineType = String.Pop(ref line);
+        Debug.Assert(lineType == (char)LineType.Request);
 
-        var lineStatus = (LineStatus)line[1];
-        int eventNumber = int.Parse(line.AsSpan(2, 6));
-        var def = new AdisRequest(eventNumber, lineStatus);
+        var lineStatus = (LineStatus)String.Pop(ref line);
+        int eventNumber = int.Parse(String.Pop(ref line, 6));
+        var request = new AdisRequest(eventNumber, lineStatus);
 
-        int i = 8;
-        while (i < line.Length - 11)
+        while (line.Length >= 11)
         {
-            int ddi = int.Parse(line.AsSpan(i, 8));
-            int len = int.Parse(line.AsSpan(i + 8, 2));
-            int res = int.Parse(line.AsSpan(i + 10, 1));
-            def.AddColumnDefinition(ddi, len, res);
-            i += 11;
+            int ddi = int.Parse(String.Pop(ref line, 8));
+            int len = int.Parse(String.Pop(ref line, 2));
+            int res = int.Parse(String.Pop(ref line, 1));
+            request.AddColumnDefinition(ddi, len, res);
         }
 
-        return def;
+        Debug.Assert(line.Length == 0, $"Line has remaining characters: {line}");
+
+        return request;
     }
 
     public void AddColumnDefinition(int ddi, int length, int resolution = 0)
